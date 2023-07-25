@@ -1,0 +1,75 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@using Gemploy.models;
+@model Employer
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+    <partial  name="notification" />
+
+    <div class="container">
+        <h1>Créer un clients</h1>
+
+        <form method="POST" >
+            <div class="border mt-4 p-3">
+                <div class="row mb-3">
+                    <label class="col-sm-3" asp-for="NameEmp">Name</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" asp-for="NameEmp" value="" />
+                        <span asp-validation-for="NameEmp" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-3" asp-for="EmailEmp">Email</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" asp-for="EmailEmp" value="" />
+                        <span asp-validation-for="EmailEmp" class="text-bg-danger"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label class="col-sm-3" asp-for="PhoneEmp">Phone</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" asp-for="PhoneEmp" value="" />
+                        <span asp-validation-for="PhoneEmp" class="text-bg-danger"></span>
+                    </div>
+                </div>
+               
+                
+                
+                <div class="row mb-3">
+                    <label class="col-sm-3" asp-for="Occupation">Profession</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" asp-for="Occupation" value="" />
+                        <span asp-validation-for="Occupation" class="text-bg-danger" /></span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <label class="col-sm-3" asp-for="BirthDay">Date de naissance</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" asp-for="BirthDay" value="" type="date" />
+                        <span asp-validation-for="BirthDay" class="text-bg-danger" /></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary"  style="width:150">Save</button>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary" style="width:150">Reset</a>
+            </div>
+        </form>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
+
+
