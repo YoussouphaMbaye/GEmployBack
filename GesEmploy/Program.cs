@@ -11,7 +11,10 @@ builder.Services.AddCors(options =>
                       policy =>
                       {
                           policy.WithOrigins("http://localhost:3000/",
-                                              "http://localhost:3000");
+                                              "http://localhost:3000").AllowAnyMethod()
+        .AllowAnyHeader()
+        .SetIsOriginAllowedToAllowWildcardSubdomains();
+
                       });
 });
 // Add services to the container.
@@ -38,7 +41,7 @@ app.UseStaticFiles(new StaticFileOptions()
 });
 app.UseRouting();
 app.UseCors(
- options => options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowCredentials()
+ options => options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowCredentials().AllowAnyHeader()
 );
 
 //app.UseRouting();

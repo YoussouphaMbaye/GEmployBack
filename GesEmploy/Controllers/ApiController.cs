@@ -24,27 +24,130 @@ namespace Gemploy.Controllers
         {
             //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
             //int i= 0;
-            
+
             string baseUrl = "http://localhost:5172/";
 
             var emps = catalogDbContext.Employers.ToList();
-                //string jjj = "kkkkk";
-                if(emps!=null && emps.Count() > 0)
-                {
-                   emps.ForEach(e => {
-                       e.UrlPicture = baseUrl+ "Resources/Images/" + e.IdEmp + ".jpg";
-                       e.UrlQrcode = baseUrl + "Resources/Images/" + e.CodeEmp + ".png";
-                   }
-                   ) ;
+            //string jjj = "kkkkk";
+            if (emps != null && emps.Count() > 0)
+            {
+                emps.ForEach(e => {
+                    e.UrlPicture = baseUrl + "Resources/Images/" + e.IdEmp + ".jpg";
+                    e.UrlQrcode = baseUrl + "Resources/Images/" + e.CodeEmp + ".png";
+                }
+                );
 
             }
             else
-            { 
+            {
                 return new List<Employer>();
 
             }
-               
-                return emps;
+
+            return emps;
+        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Employer>> GetEmployer(int id)
+        {
+            //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
+            //int i= 0;
+
+            string baseUrl = "http://localhost:5172/";
+
+            var emp = await catalogDbContext.Employers.FindAsync(id);
+            //string jjj = "kkkkk";
+            if (emp != null)
+            {
+
+                emp.UrlPicture = baseUrl + "Resources/Images/" + emp.IdEmp + ".jpg";
+                emp.UrlQrcode = baseUrl + "Resources/Images/" + emp.CodeEmp + ".png";
+
+                return emp;
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
+        }
+        [HttpPut]
+        public async Task<ActionResult> UpdateGetEmployer(Employer employer)
+        {
+            //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
+            //int i= 0;
+
+            string baseUrl = "http://localhost:5172/";
+
+            var emp = await catalogDbContext.Employers.FindAsync(employer.IdEmp);
+            //string jjj = "kkkkk";
+            if (emp != null)
+            {
+                try
+                {
+                    emp.EmailEmp= employer.EmailEmp;
+                    emp.NameEmp=employer.NameEmp;
+                    emp.BirthDay=employer.BirthDay;
+                    emp.PhoneEmp=employer.PhoneEmp;
+                    emp.EmailEmp = employer.EmailEmp;
+                    emp.Occupation=employer.Occupation;
+                    catalogDbContext.Employers.Update(emp);
+                    await catalogDbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+
+
+
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteGetEmployer(int id)
+        {
+            //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
+            //int i= 0;
+
+            string baseUrl = "http://localhost:5172/";
+
+            var emp = await catalogDbContext.Employers.FindAsync(id);
+            //string jjj = "kkkkk";
+            if (emp != null)
+            {
+                try
+                {
+                    catalogDbContext.Employers.Remove(emp);
+                    await catalogDbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+
+
+
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
         }
         [HttpPost(Name = "/PostEmployer")]
         public Employer PostEmployer([FromBody]Employer emp)

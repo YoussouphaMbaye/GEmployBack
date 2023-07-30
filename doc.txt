@@ -1,0 +1,2 @@
+add-migration initial
+uodate-database
