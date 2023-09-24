@@ -15,6 +15,8 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using System.Text.Json;
+using System.Reflection;
 
 namespace Gemploy.Controllers
 {
@@ -270,6 +272,68 @@ namespace Gemploy.Controllers
 
 
         }
+        [HttpDelete("/publicHolidays/{id}")]
+        public async Task<ActionResult> DeletePublicHoliday(int id)
+        {
+
+
+            string baseUrl = "http://localhost:5172/";
+
+            var emp = await catalogDbContext.PublicHolidays.FindAsync(id);
+            //string jjj = "kkkkk";
+            if (emp != null)
+            {
+                try
+                {
+                    catalogDbContext.PublicHolidays.Remove(emp);
+                    await catalogDbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
+        }
+        [HttpDelete("/Horaires/{id}")]
+        public async Task<ActionResult> DeleteHoraire(int id)
+        {
+
+
+            string baseUrl = "http://localhost:5172/";
+
+            var emp = await catalogDbContext.Horaire.FindAsync(id);
+            //string jjj = "kkkkk";
+            if (emp != null)
+            {
+                try
+                {
+                    catalogDbContext.Horaire.Remove(emp);
+                    await catalogDbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
+        }
         [HttpDelete("/deleteDayOffEmp")]
         public async Task<ActionResult> DeleteGetEmployer(int idEmp, int idDayOff)
         {
@@ -413,19 +477,76 @@ namespace Gemploy.Controllers
                 Employer emp = await catalogDbContext.Employers.Where(e => e.CodeEmp == numQr).SingleOrDefaultAsync();
                 GetIn g = new GetIn();
                 //Day off
-
+                Console.WriteLine(emp.NameEmp);
+                var dd = DateTime.Now;
+                Console.WriteLine("nnnnnn");
                 if (emp != null)
                 {
-                    GetIn getin = await catalogDbContext.GetIn.Where(e => e.dateIn == DateOnly.FromDateTime(DateTime.Now)).SingleOrDefaultAsync();
+                    Console.WriteLine("Not null");
+                    GetIn getin = await catalogDbContext.GetIn.Where(e => e.dateIn == DateOnly.FromDateTime(dd) && e.EmployerId==emp.IdEmp).SingleOrDefaultAsync();
+                    Console.WriteLine(getin);
+                   
                     if (getin == null)
                     {
+                        Console.WriteLine("Dans");
                         g.EmployerId = emp.IdEmp;
-                        g.hour = TimeOnly.FromDateTime(DateTime.Now);
-                        g.dateIn = DateOnly.FromDateTime(DateTime.Now);
+                        g.hour = TimeOnly.FromDateTime(dd);
+                        g.dateIn = DateOnly.FromDateTime(dd);
 
                         await catalogDbContext.GetIn.AddAsync(g);
                         await catalogDbContext.SaveChangesAsync();
 
+                    }
+
+
+
+                }
+                return g;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+
+        }
+        [HttpPost("/PostGetOutQrCode")]
+        public async Task<GetOut> PostGetOutQrcode(string numQr)
+        {
+
+            try
+            {
+                Employer emp = await catalogDbContext.Employers.Where(e => e.CodeEmp == numQr).SingleOrDefaultAsync();
+                GetOut g = new GetOut();
+                //Day off
+                Console.WriteLine(emp.NameEmp);
+                var dd = DateTime.Now;
+                //Console.WriteLine("nnnnnn");
+                if (emp != null)
+                {
+                    //Si il est deja venu
+                    GetIn getIn = await catalogDbContext.GetIn.Where(e => e.dateIn == DateOnly.FromDateTime(dd) && e.EmployerId == emp.IdEmp).SingleOrDefaultAsync();
+                    if (getIn != null)
+                    {
+                        GetOut getOut = await catalogDbContext.GetOut.Where(e => e.dateOut == DateOnly.FromDateTime(dd) && e.EmployerId == emp.IdEmp).SingleOrDefaultAsync();
+
+
+                        if (getOut == null)
+                        {
+                            Console.WriteLine("Dans");
+                            g.EmployerId = emp.IdEmp;
+                            g.hour = TimeOnly.FromDateTime(dd);
+                            g.dateOut = DateOnly.FromDateTime(dd);
+
+                            await catalogDbContext.GetOut.AddAsync(g);
+                            await catalogDbContext.SaveChangesAsync();
+
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No getIn to getOut");
                     }
 
 
@@ -519,8 +640,10 @@ namespace Gemploy.Controllers
 
         }
         [HttpGet("/missingOrHierDate")]
-        public async Task<List<EmpResult>> missingOrHierDate(DateTime theDate, string? codeEmp, string? HierOrMissing)
+        public async Task<ActionResult> missingOrHierDate(DateTime theDate, string? codeEmp, string? HierOrMissing)
         {
+            var nbHier = 0;
+            var nbMissing = 0;
             try
             {
                 DateTime gDayNow = theDate;
@@ -542,17 +665,26 @@ namespace Gemploy.Controllers
                     empR.employer = g;
                     Console.WriteLine(empR.employer.NameEmp);
                     GetIn gg = await catalogDbContext.GetIn.Include(e => e.Employer).Where(ge => ge.dateIn == dateNow && ge.EmployerId == g.IdEmp).SingleOrDefaultAsync();
-
-                    empR.hier = "Missing";
+                    
+                        empR.hier = "Missing";
                     if (gg != null)
                     {
                         if (gg.Employer.HoraireId != null)
                         {
+
                             Console.WriteLine(gg.Employer.NameEmp);
                             empR.hier = "Hier";
+                            nbHier += 1;
                             Horaire h = await catalogDbContext.Horaire.FirstAsync(e => e.IdHoraire == gg.Employer.HoraireId);
                             Console.WriteLine(gg.hour - h.TimeStart);
                             empR.late = TimeOnly.FromTimeSpan(gg.hour - h.TimeStart);
+                            empR.hourGetIn = gg.hour;
+                            GetOut getO = await catalogDbContext.GetOut.Include(e => e.Employer).Where(ge => ge.dateOut == dateNow && ge.EmployerId == g.IdEmp).SingleOrDefaultAsync();
+
+                            if (getO != null)
+                            {
+                                empR.hourGetOut = getO.hour;
+                            }
                         }
                     }
 
@@ -607,7 +739,8 @@ namespace Gemploy.Controllers
                 }
                 //catalogDbContext.SaveChangesAsync();
 
-                return listEmpR;
+                var res = JsonSerializer.Serialize(new { listEmp = listEmpR, nbHier = nbHier, nbMissing = nbMissing });
+                return Ok(res); ;
             }
             catch (Exception ex)
             {
@@ -618,8 +751,10 @@ namespace Gemploy.Controllers
 
         }
         [HttpGet("/missingOrHier")]
-        public async Task<List<EmpResult>> missingOrHier()
+        public async Task<ActionResult> missingOrHier()
         {
+            var nbHier = 0;
+            var nbMissing = 0;
 
             try
             { DateTime gDayNow = DateTime.Now;
@@ -630,21 +765,32 @@ namespace Gemploy.Controllers
                 foreach (Employer g in emps)
                 {
                     Console.WriteLine("==========================");
+                    Console.WriteLine(dateNow);
                     EmpResult empR = new EmpResult();
                     empR.employer = g;
                     Console.WriteLine(empR.employer.NameEmp);
                     GetIn gg = await catalogDbContext.GetIn.Include(e => e.Employer).Where(ge => ge.dateIn == dateNow && ge.EmployerId == g.IdEmp).SingleOrDefaultAsync();
-
+                    Console.WriteLine(gg);
                     empR.hier = "Missing";
                     if (gg != null)
                     {
+                        Console.WriteLine("not nul"+gg);
                         if (gg.Employer.HoraireId != null)
                         {
-                            Console.WriteLine(gg.Employer.NameEmp);
+                            Console.WriteLine("--------nnnnn----------"+gg.Employer.NameEmp);
                             empR.hier = "Hier";
+                            nbHier += 1;
+                            
                             Horaire h = await catalogDbContext.Horaire.FirstAsync(e => e.IdHoraire == gg.Employer.HoraireId);
                             Console.WriteLine(gg.hour - h.TimeStart);
                             empR.late = TimeOnly.FromTimeSpan(gg.hour - h.TimeStart);
+                            empR.hourGetIn = gg.hour;
+                            GetOut getO = await catalogDbContext.GetOut.Include(e => e.Employer).Where(ge => ge.dateOut == dateNow && ge.EmployerId == g.IdEmp).SingleOrDefaultAsync();
+
+                            if (getO != null)
+                            {
+                                empR.hourGetOut = getO.hour;
+                            }
                         }
                     }
 
@@ -688,8 +834,8 @@ namespace Gemploy.Controllers
 
                 }
                 //catalogDbContext.SaveChangesAsync();
-
-                return listEmpR;
+                var res= JsonSerializer.Serialize(new { listEmp = listEmpR, nbHier = nbHier, nbMissing = nbMissing });
+                return Ok(res);
             }
             catch (Exception ex)
             {
@@ -777,7 +923,7 @@ namespace Gemploy.Controllers
             }
 
         }
-        [HttpPost("/GetPublicHolidays")]
+        [HttpGet("/GetPublicHolidays")]
         public async Task<List<PublicHolidays>> GetPublicHolidays()
         {
 
