@@ -10,5 +10,6 @@ namespace GesEmploy.models
         public TimeOnly late { get; set; }
         public TimeOnly hourGetIn { get; set; }
         public TimeOnly hourGetOut { get; set; }
+        public DateOnly theDate { get; set; }
     }
 }

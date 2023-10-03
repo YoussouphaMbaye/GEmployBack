@@ -468,6 +468,101 @@ namespace Gemploy.Controllers
 
 
         }
+        [HttpGet("/controleEmploy")]
+        public async Task<ActionResult> controleEmploy(DateTime startDate, DateTime endDate,int idEmp,string? hierOrMissing)
+        {
+            int nb= (int)(endDate - startDate).TotalDays;
+            List<EmpResult> result = new List<EmpResult>();
+            for(int i = 0;  i <= nb; i++)
+            {
+                EmpResult emp = new EmpResult();
+                
+                Employer ep=await catalogDbContext.Employers.Include(e => e.Horaire).Where(e=>e.IdEmp== idEmp).SingleOrDefaultAsync();
+                if (ep!=null)
+                {
+                    emp.theDate = DateOnly.FromDateTime(startDate).AddDays(i);
+                    Console.WriteLine(DateOnly.FromDateTime(startDate).AddDays(i));
+                    DateOnly theDate = DateOnly.FromDateTime(startDate).AddDays(i);
+                    GetIn getin = await catalogDbContext.GetIn.Where(e => e.dateIn == theDate && e.EmployerId == idEmp).SingleOrDefaultAsync();
+                    
+                    emp.employer = ep;
+                    if (getin!=null)
+                    {
+                        emp.hourGetIn = getin.hour;
+                        emp.hier = "Hier";
+                        if (ep.Horaire != null) {
+                            emp.late = TimeOnly.FromTimeSpan(getin.hour - ep.Horaire.TimeStart);
+                        }
+                        
+                        GetOut getO = await catalogDbContext.GetOut.Include(e => e.Employer).Where(ge => ge.dateOut == theDate && ge.EmployerId == idEmp).SingleOrDefaultAsync();
+                        if (getO != null)
+                        {
+                            emp.hourGetOut = getin.hour;
+                        
+                        }
+                    }
+                    else
+                    {
+                        emp.hier = "Missing";
+                        //Day off
+                        List<DayOffEmployer> demps = await catalogDbContext.DayOffEmployer.Include(d => d.DayOff).Where(d => d.IdEmp == ep.IdEmp).ToListAsync();
+                        if (demps != null)
+                        {
+                            foreach (DayOffEmployer demp in demps)
+                            {
+                                Console.WriteLine(demp.DayOff.WeeDay);
+                                //Console.WriteLine((int)gDayNow.DayOfWeek);
+                                if (demp.DayOff.WeeDay == (int)DateOnly.FromDateTime(startDate).AddDays(i).DayOfWeek)
+                                {
+                                    Console.WriteLine("Day off");
+                                    emp.hier = "Day off";
+                                }
+
+                            }
+                        }
+                        //Hoilidays
+                        PublicHolidays ph = catalogDbContext.PublicHolidays.Where(p => p.date == DateOnly.FromDateTime(startDate).AddDays(i)).SingleOrDefault();
+
+                        if (ph != null)
+                        {
+                            //PublicHolidays ph = phs.First();
+                            Console.WriteLine("public Holidays");
+                            emp.hier = "Holiday";
+
+                        }
+                        //Day off days
+                        DayOfDay dy = catalogDbContext.DayOfDay.Where(d => d.dateStart < DateOnly.FromDateTime(startDate).AddDays(i) && d.dateEnd > DateOnly.FromDateTime(startDate).AddDays(i) && d.active == true).SingleOrDefault();
+
+                        Console.WriteLine("============kkkkk=======");
+                        Console.WriteLine(dy);
+                        if (dy != null)
+                        {
+                            Console.WriteLine("En congé");
+                            emp.hier = "En congé";
+
+                        }
+
+                        
+
+                    }
+                    if (hierOrMissing == null)
+                    {
+                        result.Add(emp);
+
+                    }
+                    else if (hierOrMissing == emp.hier)
+                    {
+                        result.Add(emp);
+
+                    }
+
+
+                }
+                //result.Add(emp);
+
+            }
+            return Ok(result);
+        }
         [HttpPost("/PostGetInQrCode")]
         public async Task<GetIn> PostGetInQrcode(string numQr)
         {
@@ -717,11 +812,12 @@ namespace Gemploy.Controllers
 
                     }
                     //Day off days
-                    DayOfDay dy = catalogDbContext.DayOfDay.Where(d => d.dateStart > DateOnly.FromDateTime(gDayNow) && d.dateEnd < DateOnly.FromDateTime(gDayNow) && d.active == true).SingleOrDefault();
+                    DayOfDay dy = catalogDbContext.DayOfDay.Where(d => d.dateStart < DateOnly.FromDateTime(gDayNow) && d.dateEnd > DateOnly.FromDateTime(gDayNow) && d.active == true).SingleOrDefault();
 
                     if (dy != null)
                     {
                         Console.WriteLine("En congé");
+                        empR.hier = "En congé";
 
                     }
 
@@ -739,7 +835,11 @@ namespace Gemploy.Controllers
                 }
                 //catalogDbContext.SaveChangesAsync();
 
-                var res = JsonSerializer.Serialize(new { listEmp = listEmpR, nbHier = nbHier, nbMissing = nbMissing });
+                //var res = JsonSerializer.Serialize(new { listEmp = listEmpR, nbHier = nbHier, nbMissing = nbMissing });
+                FormatResult res = new FormatResult();
+                res.listEmpR = listEmpR;
+                res.nbHier = nbHier;
+                res.nbMissing = nbMissing;
                 return Ok(res); ;
             }
             catch (Exception ex)
@@ -823,18 +923,24 @@ namespace Gemploy.Controllers
 
                     }
                     //Day off days
-                    DayOfDay dy = catalogDbContext.DayOfDay.Where(d => d.dateStart > DateOnly.FromDateTime(gDayNow) && d.dateEnd < DateOnly.FromDateTime(gDayNow) && d.active == true).SingleOrDefault();
+                    DayOfDay dy = catalogDbContext.DayOfDay.Where(d => d.dateStart < DateOnly.FromDateTime(gDayNow) && d.dateEnd > DateOnly.FromDateTime(gDayNow) && d.active == true).SingleOrDefault();
 
                     if (dy != null)
                     {
                         Console.WriteLine("En congé");
+                        empR.hier = "En congé";
 
                     }
                     listEmpR.Add(empR);
 
                 }
                 //catalogDbContext.SaveChangesAsync();
-                var res= JsonSerializer.Serialize(new { listEmp = listEmpR, nbHier = nbHier, nbMissing = nbMissing });
+               // var res= JsonSerializer.Serialize(new { listEmp = listEmpR, nbHier = nbHier, nbMissing = nbMissing });
+                FormatResult res = new FormatResult();
+                res.listEmpR = listEmpR;
+                res.nbHier = nbHier;
+                res.nbMissing = nbMissing;
+                return Ok(res); ;
                 return Ok(res);
             }
             catch (Exception ex)
