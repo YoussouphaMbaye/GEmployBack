@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace GesEmploy.models
 {
-    public class Horaire
+    public class Horaire: BaseEntity
     {
         [Key]
         public int IdHoraire { get; set; }

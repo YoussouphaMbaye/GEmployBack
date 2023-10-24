@@ -2,7 +2,7 @@
 
 namespace GesEmploy.models
 {
-    public class PublicHolidays
+    public class PublicHolidays: BaseEntity
     {
         [Key]
         public int IdPublicHolidaysayOff { get; set; }

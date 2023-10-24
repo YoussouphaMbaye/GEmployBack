@@ -37,9 +37,15 @@ namespace GesEmploy.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DepartementId")
+                        .HasColumnType("int");
+
                     b.Property<string>("EmailEmp")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("HoraireId")
                         .HasColumnType("int");
@@ -49,17 +55,15 @@ namespace GesEmploy.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("Occupation")
-                        .IsRequired()
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
                     b.Property<string>("PhoneEmp")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UrlPicture")
                         .HasColumnType("nvarchar(max)");
@@ -68,6 +72,11 @@ namespace GesEmploy.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdEmp");
+
+                    b.HasIndex("DepartementId");
+
+                    b.HasIndex("EmailEmp")
+                        .IsUnique();
 
                     b.HasIndex("HoraireId");
 
@@ -79,10 +88,16 @@ namespace GesEmploy.Migrations
                     b.Property<int>("IdLog")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("PassWord")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserName")
                         .IsRequired()
@@ -102,8 +117,14 @@ namespace GesEmploy.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDayOffDay"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("EmployerId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("active")
                         .HasColumnType("bit");
@@ -129,6 +150,12 @@ namespace GesEmploy.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDayOff"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("WeeDay")
                         .HasColumnType("int");
 
@@ -145,11 +172,38 @@ namespace GesEmploy.Migrations
                     b.Property<int>("IdDayOff")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("IdEmp", "IdDayOff");
 
                     b.HasIndex("IdDayOff");
 
                     b.ToTable("DayOffEmployer");
+                });
+
+            modelBuilder.Entity("GesEmploy.models.Departement", b =>
+                {
+                    b.Property<int>("IdDepartement")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDepartement"));
+
+                    b.Property<string>("DepartementName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdDepartement");
+
+                    b.ToTable("Departement");
                 });
 
             modelBuilder.Entity("GesEmploy.models.GetIn", b =>
@@ -160,8 +214,14 @@ namespace GesEmploy.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdGetIn"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("EmployerId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("dateIn")
                         .HasColumnType("date");
@@ -184,8 +244,14 @@ namespace GesEmploy.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdGetOut"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("EmployerId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("dateOut")
                         .HasColumnType("date");
@@ -208,11 +274,17 @@ namespace GesEmploy.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdHoraire"));
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<TimeSpan>("TimeEnd")
                         .HasColumnType("time");
 
                     b.Property<TimeSpan>("TimeStart")
                         .HasColumnType("time");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("type")
                         .IsRequired()
@@ -230,6 +302,12 @@ namespace GesEmploy.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPublicHolidaysayOff"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("date")
                         .HasColumnType("date");
@@ -439,9 +517,15 @@ namespace GesEmploy.Migrations
 
             modelBuilder.Entity("Gemploy.models.Employer", b =>
                 {
+                    b.HasOne("GesEmploy.models.Departement", "Departement")
+                        .WithMany("Employers")
+                        .HasForeignKey("DepartementId");
+
                     b.HasOne("GesEmploy.models.Horaire", "Horaire")
                         .WithMany("Employers")
                         .HasForeignKey("HoraireId");
+
+                    b.Navigation("Departement");
 
                     b.Navigation("Horaire");
                 });
@@ -576,6 +660,11 @@ namespace GesEmploy.Migrations
             modelBuilder.Entity("GesEmploy.models.DayOff", b =>
                 {
                     b.Navigation("DayOffEmployer");
+                });
+
+            modelBuilder.Entity("GesEmploy.models.Departement", b =>
+                {
+                    b.Navigation("Employers");
                 });
 
             modelBuilder.Entity("GesEmploy.models.Horaire", b =>

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GesEmploy.models
 {
-    public class DayOfDay
+    public class DayOfDay: BaseEntity
     {
         [Key]
         public int IdDayOffDay { get; set; }

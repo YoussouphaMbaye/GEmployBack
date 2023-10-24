@@ -5,8 +5,8 @@ using System.Text.Json.Serialization;
 namespace GesEmploy.models
 { 
 
-    public class DayOff //weekDay
-{
+    public class DayOff : BaseEntity //weekDay
+    {
           [Key]
           public int IdDayOff { get; set; }
           public int WeeDay { get; set; }

@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GesEmploy.models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Gemploy.models
 {
-    public class Login
+    public class Login: BaseEntity
     {
         [Key]
         public int IdLog { get; set; }

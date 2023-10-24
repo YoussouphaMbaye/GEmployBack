@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Gemploy.models
 {
-    public class Employer
+    public class Employer: BaseEntity
     {
         [Key]
         public int IdEmp { get; set; }
@@ -14,7 +14,7 @@ namespace Gemploy.models
         public string PhoneEmp { get; set; }
         public DateTime BirthDay { get; set; }
         public bool Status { get; set; }
-        public string Occupation { get; set; }
+       
         public string CodeEmp { get; set; }
 
 
@@ -25,9 +25,11 @@ namespace Gemploy.models
         public Login? Login { get; set; }
         
         public Horaire? Horaire { get; set; }
-        
+        public Departement? Departement { get; set; }
+
 
         public int? HoraireId { get; set; }
+        public int? DepartementId { get; set; }
         [JsonIgnore]
         public ICollection<GetIn>? getIns { get; } = new List<GetIn>();
         [JsonIgnore]

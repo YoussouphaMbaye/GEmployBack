@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace GesEmploy.models
 {
-    public class GetOut
+    public class GetOut: BaseEntity
     {
         [Key]
         public int IdGetOut { get; set; }

@@ -43,33 +43,40 @@ namespace Gemploy.Controllers
             _signInManager = signInManager;
         }
         [HttpGet(Name = "/GetEmployers")]
-        public async Task<List<Employer>> GetEmployers(string? codeEmp, string? departement)
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<List<Employer>> GetEmployers(string? codeEmp, int? departementId)
         {
             //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
             //int i= 0;
 
             string baseUrl = "http://localhost:5172/";
+             //string baseUrl = "https://ood5ih1opc.execute-api.eu-north-1.amazonaws.com/";
             string sql = "select * from employers";
-            if (codeEmp != null || departement != null)
-            {
-                sql += " where";
-            }
+            
+            sql += " where";
+            
             if (codeEmp != null)
             {
                 sql += " codeEmp='" + codeEmp + "'";
             }
-            if (codeEmp != null && departement != null)
+            if (codeEmp != null && departementId != null)
             {
                 sql += " and";
             }
-            if (departement != null)
+            if (departementId != null)
             {
-                sql += " occupation LIKE '" + departement + "%'";
+                sql += " DepartementId=" + departementId;
             }
+            if (codeEmp != null || departementId != null)
+            {
+                sql += " and";
+            }
+            sql += " status=1";
+
 
             //sql += ";";
 
-            var emps = catalogDbContext.Employers.FromSqlRaw(sql).Include(e => e.Horaire).ToList();
+            var emps = catalogDbContext.Employers.FromSqlRaw(sql).Include(e => e.Horaire).Include(e => e.Departement).ToList();
             //string jjj = "kkkkk";
             if (emps != null && emps.Count() > 0)
             {
@@ -87,6 +94,28 @@ namespace Gemploy.Controllers
             }
 
             return emps;
+        }
+        [HttpGet("/GetDepartements")]
+        public async Task<List<Departement>> GetDepartements()
+        {
+            //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
+            //int i= 0;
+
+            string baseUrl = "http://localhost:5172/";
+
+            var dep = catalogDbContext.Departement.ToList();
+            //string jjj = "kkkkk";
+            if (dep != null && dep.Count() > 0)
+            {
+                return dep;
+
+            }
+            else
+            {
+                return new List<Departement>();
+            }
+
+
         }
 
         [HttpGet("/GetHoraires")]
@@ -140,8 +169,35 @@ namespace Gemploy.Controllers
             //int i= 0;
 
             string baseUrl = "http://localhost:5172/";
+            //string baseUrl = "https://ood5ih1opc.execute-api.eu-north-1.amazonaws.com/";
 
-            var emp = await catalogDbContext.Employers.FindAsync(id);
+            var emp = await catalogDbContext.Employers.Include(e => e.Horaire).Include(e => e.Departement).Where(e=>e.IdEmp==id).SingleOrDefaultAsync();
+            //string jjj = "kkkkk";
+            if (emp != null)
+            {
+
+                emp.UrlPicture = baseUrl + "Resources/Images/" + emp.IdEmp + ".jpg";
+                emp.UrlQrcode = baseUrl + "Resources/Images/" + emp.CodeEmp + ".png";
+
+                return emp;
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
+        }
+        [HttpGet("/GetEmployerByemail")]
+        public async Task<ActionResult<Employer>> GetEmployerByEmail(string email)
+        {
+            //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
+            //int i= 0;
+
+            string baseUrl = "http://localhost:5172/";
+
+            var emp = await catalogDbContext.Employers.Where(e=>e.EmailEmp==email).SingleOrDefaultAsync();
             //string jjj = "kkkkk";
             if (emp != null)
             {
@@ -178,8 +234,9 @@ namespace Gemploy.Controllers
                     emp.BirthDay = employer.BirthDay;
                     emp.PhoneEmp = employer.PhoneEmp;
                     emp.EmailEmp = employer.EmailEmp;
-                    emp.Occupation = employer.Occupation;
+                    emp.DepartementId = employer.DepartementId;
                     emp.HoraireId = employer.HoraireId;
+                    emp.Status=employer.Status;
                     catalogDbContext.Employers.Update(emp);
                     await catalogDbContext.SaveChangesAsync();
                 }
@@ -201,13 +258,48 @@ namespace Gemploy.Controllers
 
 
         }
-        [HttpPut("/DeactiveDayOfDay")]
-        public async Task<ActionResult> DeactivateDayOfDay(int id)
+        [HttpPut("/deactiveEmp")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
+        public async Task<ActionResult> deactiveEmp(int idEmp)
         {
             //Timer timer = new Timer(this.startTransaction, null, 0, 100000);
             //int i= 0;
 
-            string baseUrl = "http://localhost:5172/";
+            //youssou cisse
+
+            var emp = await catalogDbContext.Employers.FindAsync(idEmp);
+            //string jjj = "kkkkk";
+            if (emp != null)
+            {
+                try
+                {
+                    
+                    emp.Status = false;
+                    catalogDbContext.Employers.Update(emp);
+                    await catalogDbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+
+
+
+                return Ok(emp);
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
+        }
+        [HttpPut("/DeactiveDayOfDay")]
+        public async Task<ActionResult> DeactivateDayOfDay(int id)
+        {
+            
             DayOfDay d = null;
 
             d = await catalogDbContext.DayOfDay.FindAsync(id);
@@ -245,9 +337,6 @@ namespace Gemploy.Controllers
         public async Task<ActionResult> DeleteGetEmployer(int id)
         {
 
-
-            string baseUrl = "http://localhost:5172/";
-
             var emp = await catalogDbContext.Employers.FindAsync(id);
             //string jjj = "kkkkk";
             if (emp != null)
@@ -255,6 +344,34 @@ namespace Gemploy.Controllers
                 try
                 {
                     catalogDbContext.Employers.Remove(emp);
+                    await catalogDbContext.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+
+            }
+
+
+        }
+        [HttpDelete("/deleteDepartement/{id}")]
+        public async Task<ActionResult> DeleteDepartement(int id)
+        {
+
+            var dep = await catalogDbContext.Departement.FindAsync(id);
+            //string jjj = "kkkkk";
+            if (dep != null)
+            {
+                try
+                {
+                    catalogDbContext.Departement.Remove(dep);
                     await catalogDbContext.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -366,6 +483,7 @@ namespace Gemploy.Controllers
 
         }
         [HttpPost(Name = "/PostEmployer")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = nameof(RoleTypes.User))]
         public Employer PostEmployer([FromBody] Employer emp)
         {
             double ConvertToUnixTimestamp(DateTime date)
@@ -392,6 +510,48 @@ namespace Gemploy.Controllers
                 await catalogDbContext.SaveChangesAsync();
 
                 return horaire;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [HttpPost("/PostDepartement")]
+        public async Task<Departement> PostDepartement([FromBody] Departement dep)
+        {
+
+            try
+            {
+
+                await catalogDbContext.Departement.AddAsync(dep);
+                await catalogDbContext.SaveChangesAsync();
+
+                return dep;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [HttpPut("/UpdateDepartement")]
+        public async Task<ActionResult> PutDepartement([FromBody] Departement dep)
+        {
+
+            try
+            {
+                Departement departement=await catalogDbContext.Departement.Where(d=>d.IdDepartement==dep.IdDepartement).FirstOrDefaultAsync();
+
+                if (departement != null)
+                {
+                    departement.DepartementName=dep.DepartementName;
+                    departement.Description=dep.Description;
+                    catalogDbContext.Departement.Update(departement);
+                    await catalogDbContext.SaveChangesAsync();
+                    return Ok(dep);
+                }
+
+                return NotFound();
+                
             }
             catch (Exception ex)
             {
@@ -477,7 +637,7 @@ namespace Gemploy.Controllers
             {
                 EmpResult emp = new EmpResult();
                 
-                Employer ep=await catalogDbContext.Employers.Include(e => e.Horaire).Where(e=>e.IdEmp== idEmp).SingleOrDefaultAsync();
+                Employer ep=await catalogDbContext.Employers.Include(e => e.Horaire).Include(e => e.Departement).Where(e=>e.IdEmp== idEmp).SingleOrDefaultAsync();
                 if (ep!=null)
                 {
                     emp.theDate = DateOnly.FromDateTime(startDate).AddDays(i);

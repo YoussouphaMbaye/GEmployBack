@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
                       {
                           policy.WithOrigins("http://localhost:3000/",
                                               "http://localhost:3000").AllowAnyMethod()
-        .AllowAnyHeader()
+        .AllowAnyHeader().AllowAnyHeader()
         .SetIsOriginAllowedToAllowWildcardSubdomains();
 
                       });
@@ -51,6 +51,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+//aws
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 var app = builder.Build();
 
@@ -64,12 +66,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions()
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources\Images")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources/Images")),
     RequestPath = new PathString("/Resources/Images")
 });
 app.UseRouting();
 app.UseCors(
- options => options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowCredentials().AllowAnyHeader()
+ options => options.WithOrigins("http://localhost:3000", "https://main.d1oaiplh3zux4s.amplifyapp.com").AllowAnyMethod().AllowCredentials().AllowAnyHeader()
 );
 
 //app.UseRouting();

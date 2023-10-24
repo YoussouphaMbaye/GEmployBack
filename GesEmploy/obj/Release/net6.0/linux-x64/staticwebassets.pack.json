@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Dell\\Documents\\nafa\\AAA\\GesEmploy\\GesEmploy\\wwwroot\\uploads\\profiles\\1.jpg",
+      "PackagePath": "staticwebassets\\uploads\\profiles\\1.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Dell\\Documents\\nafa\\AAA\\GesEmploy\\GesEmploy\\wwwroot\\uploads\\profiles\\2.jpg",
+      "PackagePath": "staticwebassets\\uploads\\profiles\\2.jpg"
+    },
+    {
+      "Id": "C:\\Users\\Dell\\Documents\\nafa\\AAA\\GesEmploy\\GesEmploy\\wwwroot\\uploads\\profiles\\fbc.png",
+      "PackagePath": "staticwebassets\\uploads\\profiles\\fbc.png"
+    },
+    {
+      "Id": "C:\\Users\\Dell\\Documents\\nafa\\AAA\\GesEmploy\\GesEmploy\\wwwroot\\uploads\\qrcodes\\N1687295657.png",
+      "PackagePath": "staticwebassets\\uploads\\qrcodes\\N1687295657.png"
+    },
+    {
+      "Id": "C:\\Users\\Dell\\Documents\\nafa\\AAA\\GesEmploy\\GesEmploy\\wwwroot\\uploads\\qrcodes\\N1687295917.png",
+      "PackagePath": "staticwebassets\\uploads\\qrcodes\\N1687295917.png"
+    },
+    {
+      "Id": "obj\\Release\\net6.0\\linux-x64\\staticwebassets\\msbuild.GesEmploy.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Release\\net6.0\\linux-x64\\staticwebassets\\msbuild.build.GesEmploy.props",
+      "PackagePath": "build\\GesEmploy.props"
+    },
+    {
+      "Id": "obj\\Release\\net6.0\\linux-x64\\staticwebassets\\msbuild.buildMultiTargeting.GesEmploy.props",
+      "PackagePath": "buildMultiTargeting\\GesEmploy.props"
+    },
+    {
+      "Id": "obj\\Release\\net6.0\\linux-x64\\staticwebassets\\msbuild.buildTransitive.GesEmploy.props",
+      "PackagePath": "buildTransitive\\GesEmploy.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

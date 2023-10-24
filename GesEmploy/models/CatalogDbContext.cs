@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Gemploy.models
 {
@@ -18,6 +19,7 @@ namespace Gemploy.models
         public DbSet<DayOfDay> DayOfDay { get; set; }
         public DbSet<DayOffEmployer> DayOffEmployer { get; set; }
         public DbSet<PublicHolidays> PublicHolidays { get; set; }
+        public DbSet<Departement> Departement { get; set; }
         public CatalogDbContext(DbContextOptions options):base(options)
         {
 
@@ -42,9 +44,9 @@ namespace Gemploy.models
         {
             //timeOnly conversion
             base.OnModelCreating(modelBuilder);
-
+            modelBuilder.Entity<Employer>().HasIndex(u => u.EmailEmp).IsUnique();
             modelBuilder.Entity<Employer>().Property(d=>d.NameEmp).IsRequired().HasMaxLength(200);
-            modelBuilder.Entity<Employer>().Property(d => d.Occupation).IsRequired().HasMaxLength(60);
+            //modelBuilder.Entity<Employer>().Property(d => d.Occupation).IsRequired().HasMaxLength(60);
             modelBuilder.Entity<Employer>().Property(c => c.BirthDay).HasColumnType("date");
             //.Entity<Employer>().Property(p => p.BirthDay).HasConversion<DateOnlyConverter>().HaveColumnType("date");
 
@@ -52,6 +54,8 @@ namespace Gemploy.models
             modelBuilder.Entity<Login>().Property(p => p.PassWord).IsRequired().HasMaxLength(10);
             modelBuilder.Entity<Login>().HasOne<Employer>(l=>l.Employ).WithOne(e=>e.Login).HasForeignKey<Login>().OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Horaire>().HasMany(h => h.Employers).WithOne(e => e.Horaire).HasForeignKey(e => e.HoraireId);
+            modelBuilder.Entity<Departement>().HasMany(e => e.Employers).WithOne(d => d.Departement).HasForeignKey(d => d.DepartementId);
+
             modelBuilder.Entity<DayOffEmployer>().HasKey(i => new { i.IdEmp, i.IdDayOff });
             modelBuilder.Entity<Employer>().HasMany(g => g.getIns).WithOne(e => e.Employer).HasForeignKey(e => e.EmployerId);
             modelBuilder.Entity<Employer>().HasMany(g => g.getOuts).WithOne(e => e.Employer).HasForeignKey(e => e.EmployerId);
@@ -59,8 +63,38 @@ namespace Gemploy.models
             modelBuilder.Entity<Employer>().HasMany(g => g.DayOffEmployer).WithOne(e => e.Employer);
             modelBuilder.Entity<DayOff>().HasMany(g => g.DayOffEmployer).WithOne(e => e.DayOff);
         }
+        public override int SaveChanges()
+        {
+            try {
+                var entries = ChangeTracker.Entries()
 
-        
+            .Where(e => e.Entity is BaseEntity && (
+                    e.State == EntityState.Added
+                    || e.State == EntityState.Modified));
+
+                foreach (var entityEntry in entries)
+                {
+                    ((BaseEntity)entityEntry.Entity).UpdatedDate = DateTime.Now;
+
+                    if (entityEntry.State == EntityState.Added)
+                    {
+                        ((BaseEntity)entityEntry.Entity).CreatedDate = DateTime.Now;
+                    }
+                }
+                return base.SaveChanges();
+
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+            return 0;
+            
+
+        }
+
+
     }
     public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
     {
@@ -72,4 +106,5 @@ namespace Gemploy.models
                 d => DateOnly.FromDateTime(d))
         { }
     }
+    
 }

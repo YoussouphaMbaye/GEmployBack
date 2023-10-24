@@ -1,2 +1,2 @@
 add-migration initial
-uodate-database
+update-database

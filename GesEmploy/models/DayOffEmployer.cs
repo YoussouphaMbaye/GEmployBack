@@ -2,7 +2,7 @@
 
 namespace GesEmploy.models
 {
-    public class DayOffEmployer
+    public class DayOffEmployer: BaseEntity
     {
         public int IdEmp { get; set; }
         public Employer ? Employer { get; set; }
